@@ -1,2 +1,5 @@
-# inference-api
-API for Wikimedia task
+## Inferring Countries based on Article Outlinks/Inlinks
+
+This project consists of a web app
+
+
