@@ -167,7 +167,7 @@ object {
 	margin-left: auto;
 	margin-right: auto;
 }
-
+	
 .boxwidth--1-1 {
 	max-width: 114rem;
 }
@@ -827,3 +827,4 @@ body.js #tool_main form label.placeholder.off .field_name {
 		font-size: 1.4rem;
 	}
 }
+  

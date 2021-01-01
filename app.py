@@ -1,6 +1,7 @@
 from flask import Flask,jsonify,request, render_template
 import pandas as pd
 import mwapi
+import time
 import bz2  # necessary for decompressing dump file into text format
 import json
 
@@ -20,22 +21,32 @@ def index():
 
 
 @app.route('/api/v1/get-summary',methods=['GET'])
-def get_outlink_summary():
+def get_link_summary():
     '''
-    This function merges the get_outlinks and get_summary function together to get summary stats of article
+    This function merges the get_outlinks/get_inlinks and get_summary function together to get summary stats of article
     '''
     lang,title,error,threshold = validate_api_args()
     if error is not None:
         data = {'Error':error}
         return jsonify(data),404
     else:
+        start_time = time.time()
         outlinks = get_outlinks(title,lang)
+        end_time_three = time.time() - start_time
+        print(f"Outlink extraction took {end_time_three} seconds") 
+        start_time_three = time.time()
         inlinks = get_inlinks(title,lang)
-
+        end_time = time.time() - start_time_three
+        print(f"Inlink extraction took {end_time} seconds")
+        start_time_two = time.time() 
         outlink_summary = get_summary_stats(outlinks,threshold)
         inlink_summary = get_summary_stats(inlinks,threshold)
+        end_time_two = time.time() - start_time_two
+        print(f"Inlink/Outlink Summary took {end_time_two} seconds") 
         data = {'article': 'https://{0}.wikipedia.org/wiki/{1}'.format(lang, title),
             'results':{
+                'outlink_count':len(outlinks),
+                'inlink_count':len(inlinks),
                 'outlink_summary':outlink_summary,
                 'inlink_summary':inlink_summary
                 }
@@ -206,7 +217,7 @@ def get_inlinks(title,language,session=None):
         session = mwapi.Session('https://{0}.org'.format(SITENAME), user_agent='{0} -- {1}'.format(test_label, contact_email))
     
     
-    #Initialize outlinks list
+    #Initialize inlinks list
     inlinks = []
     
     params = {'action':'query',
@@ -321,7 +332,6 @@ def get_summary_stats(list_of_links,threshold=0.5):
     
     max_val = max(final_dict.values(),default=0)    
     
-    
     #Check if threshold is an integer, if not convert
     if type(threshold) != int and not None and type(threshold) != float:
         #Check if threshold is a string float e.g "2.3" and convert to actual float
@@ -331,12 +341,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
                 if threshold > 1:
                     threshold = int(threshold)
                     #Contains regions with frequency of occurence above set threshold
-                    above_threshold = [k for k,v in final_dict.items() if v > threshold]
+                    above_threshold = [k for k,v in final_dict.items() if v >= threshold]
 
                     #Contains regions with frequency of occurence below set threshold
                     below_threshold = [k for k,v in final_dict.items() if v < threshold]
                 else:
-                    above_threshold = [k for k,v in final_dict.items() if v > threshold * link_total]
+                    above_threshold = [k for k,v in final_dict.items() if v >= threshold * link_total]
                     below_threshold = [k for k,v in final_dict.items() if v < threshold * link_total]
             except:
                 error = "Threshold passed is not a number. Please input a number and try again."
@@ -356,12 +366,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
                 error = "Threshold passed is not a number. Please input a number and try again."
                 return error
     elif type(threshold) == float:
-        above_threshold = [k for k,v in final_dict.items() if v > threshold * link_total]
+        above_threshold = [k for k,v in final_dict.items() if v >= threshold * link_total]
         below_threshold = [k for k,v in final_dict.items() if v < threshold * link_total]
         
     elif type(threshold) == int:
         #Contains regions with frequency of occurence above set threshold
-        above_threshold = [k for k,v in final_dict.items() if v > threshold]
+        above_threshold = [k for k,v in final_dict.items() if v >= threshold]
                 
         #Contains regions with frequency of occurence below set threshold
         below_threshold = [k for k,v in final_dict.items() if v < threshold]
@@ -375,6 +385,7 @@ def get_summary_stats(list_of_links,threshold=0.5):
     final_dict = dict(sorted(final_dict.items(), key=lambda x: x[1], reverse=True))
     percentage_dict = dict(sorted(percentage_dict.items(), key=lambda x: x[1], reverse=True))
     link_summ_list = [{'region':x[0],'link-count':x[1],'percent-dist':y[1]} for x,y in zip(final_dict.items(),percentage_dict.items()) ]
+    
     summary_stats = {
         'regions': unique_region_list,
         'unique-count': len(unique_region_list),

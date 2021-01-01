@@ -135,14 +135,20 @@
 
 	    var render_categories = function(data) {
 			$("#country-results").empty();
+			
 			if ("Error" in data) {
 				$("#country-results").append("<br><p>Error: " + data["Error"] + "</p>");
 			}
 			else {
 				$("#country-results").append('<br><h3><a href="' + data["article"] + '">' + document.getElementById('title').value + '</a></h3>');
-				
+				$("#country-results").append('<ol>');
+				$("#country-results").append('<li><b>Total Number of Outlinks: ' + data['results']['outlink_count']);
+				$("#country-results").append('<li><b>Total Number of Inlinks: ' + data['results']['inlink_count']);
+				$("#country-results").append('</ol>');
+
 				if (data['results']['outlink_summary']['region-prediction'].length > 0){
 					$("#country-results").append('<br><h2> Outlink Summary </h2>')
+					$("#country-results").append('<div class = "legend"><'
 					$("#country-results").append('<table id="outlink-summary-table" class="display"><thead><tr><th>Region</th><th>Outlink Count</th><th>Percentage distribution of outlinks (%)</th></tr></thead></table>')
 				}else{
 					$("#country-results").append("<li><No outlink summary generated.</li>");
@@ -155,9 +161,23 @@
 				}
 				$(document).ready( function () {
 					var outlink_data = data['results']['outlink_summary']['link-percent-count-dist']
-    				var inlink_data = data['results']['inlink_summary']['link-percent-count-dist']
+    				var outlink_above_thresh = data['results']['outlink_summary']['above-threshold']
+					var inlink_data = data['results']['inlink_summary']['link-percent-count-dist']
+					var inlink_above_thresh = data['results']['inlink_summary']['above-threshold']
+					
 					$('#outlink-summary-table').DataTable({
 						data:outlink_data,
+						ordering:false,
+						createdRow: function(row,data,dataIndex){
+             				if (outlink_above_thresh.includes(data["region"])){
+								
+								 $(row).css('background-color','#bae4bc');
+     
+       						}
+							else{
+								$(row).css('background-color','#fdae6b');
+							}
+						},
 						columns: [
         					{ data: 'region' },
         					{ data: 'link-count' },
@@ -166,6 +186,16 @@
 					});
 					$('#inlink-summary-table').DataTable({
 						data:inlink_data,
+						ordering:false,
+						createdRow: function(row,data,dataIndex){
+							if (inlink_above_thresh.includes(data["region"])){
+								 $(row).css('background-color','#bae4bc');
+     
+       						}
+							else{
+								$(row).css('background-color','#fdae6b');
+							}
+						},
 						columns: [
         					{ data: 'region' },
         					{ data: 'link-count' },
@@ -186,8 +216,6 @@
 
 
 	  	function queryCountryAPI() {
-			console.log(document.getElementById('lang'));
-			console.log(document.getElementById('title'));
 			if (document.getElementById('lang').value && !document.getElementById('title').value) {
 				
 				var randomPageQueryURL = "https://" + document.getElementById('lang').value + ".wikipedia.org/w/api.php?action=query&format=json&list=random&rnlimit=1&rnnamespace=0&origin=*";
@@ -198,7 +226,7 @@
 				  );
 			}
 
-			var queryUrl = "http://127.0.0.1:5000/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value;
+			var queryUrl = "http://127.0.0.1:5000/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
 			$.ajax(queryUrl, {success: render_categories.bind(this),
 							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
 							  }
