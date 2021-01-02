@@ -105,7 +105,7 @@ def get_outlinks(title,language,session=None):
     
     #If there is no session set, set one
     if session is None:
-        SITENAME = f'{language.lower()}.wikipedia'
+        SITENAME = '{0}.wikipedia'.format(language.lower())
         test_label = 'Inference API Outreachy (mwapi)'
         contact_email = 'isaac@wikimedia.org'
         session = mwapi.Session('https://{0}.org'.format(SITENAME), user_agent='{0} -- {1}'.format(test_label, contact_email))
@@ -208,7 +208,7 @@ def get_inlinks(title,language,session=None):
     
     #If there is no session set, set one
     if session is None:
-        SITENAME = f'{language.lower()}.wikipedia'
+        SITENAME = '{0}.wikipedia'.format(language.lower())
         test_label = 'Inference API Outreachy (mwapi)'
         contact_email = 'isaac@wikimedia.org'
         session = mwapi.Session('https://{0}.org'.format(SITENAME), user_agent='{0} -- {1}'.format(test_label, contact_email))
