@@ -33,16 +33,13 @@ def get_link_summary():
         start_time = time.time()
         outlinks = get_outlinks(title,lang)
         end_time_three = time.time() - start_time
-        print(f"Outlink extraction took {end_time_three} seconds") 
         start_time_three = time.time()
         inlinks = get_inlinks(title,lang)
         end_time = time.time() - start_time_three
-        print(f"Inlink extraction took {end_time} seconds")
         start_time_two = time.time() 
         outlink_summary = get_summary_stats(outlinks,threshold)
         inlink_summary = get_summary_stats(inlinks,threshold)
         end_time_two = time.time() - start_time_two
-        print(f"Inlink/Outlink Summary took {end_time_two} seconds") 
         data = {'article': 'https://{0}.wikipedia.org/wiki/{1}'.format(lang, title),
             'results':{
                 'outlink_count':len(outlinks),
