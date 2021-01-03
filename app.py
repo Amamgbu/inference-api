@@ -14,7 +14,7 @@ app = Flask(__name__)
 #On app start, process data and save as dict
 cleaned_dict = {}
 with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
-    for item in file:
+    for i,item in enumerate(file):
         data = json.loads(item)
         if len(data['region_list']) > 1:
             cleaned_dict[data['item']] = tuple(data['region_list'])
@@ -22,7 +22,9 @@ with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "
             cleaned_dict[data['item']] = data['region_list'][0]
         else:
             cleaned_dict[data['item']] = None
-
+        if i%100000 == 0:
+            print('{0} lines processed'.format(i))
+            
 @app.route('/')
 def index():
     return render_template('index.html')
