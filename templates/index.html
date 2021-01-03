@@ -258,7 +258,7 @@
 				  );
 			}
 
-			var queryUrl = "http://127.0.0.1:5000/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
+			var queryUrl = "https://experimental-embeddings.toolforge.org/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
 			$.ajax(queryUrl, {success: render_categories.bind(this),
 							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
 							  }
