@@ -9,7 +9,7 @@
 	<link href="https://tools-static.wmflabs.org/fontcdn/css?family=Merriweather:400,400italic,700,700italic&subset=latin" rel="stylesheet" type="text/css">
 	<link href='https://tools-static.wmflabs.org/fontcdn/css?family=Lato:400,400italic,700,700italic&subset=latin' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" href="./static/style.css" />
-	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+	<link rel="stylesheet" type="text/css" href="https://tools-static.wmflabs.org/cdnjs/ajax/libs/datatables/1.10.21/css/jquery.dataTables.css">
   
 	
 	<style>
@@ -258,7 +258,7 @@
 				  );
 			}
 
-			var queryUrl = "https://experimental-embeddings.toolforge.org/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
+			var queryUrl = "http://127.0.0.1:5000/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
 			$.ajax(queryUrl, {success: render_categories.bind(this),
 							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
 							  }

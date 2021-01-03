@@ -5,16 +5,23 @@ import mwapi
 import time
 import bz2  # necessary for decompressing dump file into text format
 import json
+import sys
+
 
 app = Flask(__name__)
 
 
-#On app start, process data and saved as dict
+#On app start, process data and save as dict
 cleaned_dict = {}
 with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
     for item in file:
         data = json.loads(item)
-        cleaned_dict[data['item']] = data['region_list']
+        if len(data['region_list']) > 1:
+            cleaned_dict[data['item']] = tuple(data['region_list'])
+        elif len(data['region_list']) == 1:
+            cleaned_dict[data['item']] = data['region_list'][0]
+        else:
+            cleaned_dict[data['item']] = None
 
 @app.route('/')
 def index():
@@ -31,16 +38,10 @@ def get_link_summary():
         data = {'Error':error}
         return jsonify(data),404
     else:
-        start_time = time.time()
         outlinks = get_outlinks(title,lang)
-        end_time_three = time.time() - start_time
-        start_time_three = time.time()
-        inlinks = get_inlinks(title,lang)
-        end_time = time.time() - start_time_three
-        start_time_two = time.time() 
+        inlinks = get_inlinks(title,lang) 
         outlink_summary = get_summary_stats(outlinks,threshold)
         inlink_summary = get_summary_stats(inlinks,threshold)
-        end_time_two = time.time() - start_time_two
         data = {'article': 'https://{0}.wikipedia.org/wiki/{1}'.format(lang, title),
             'results':{
                 'outlink_count':len(outlinks),
@@ -306,13 +307,22 @@ def get_summary_stats(list_of_links,threshold=0.5):
     summary_stats = {}
     percentage_dict = {}
     
-    
     region_list = [cleaned_dict.get(outlink_item[0]) for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0],None) is not None]
     
     link_list = [{outlink_item[1]: cleaned_dict.get(outlink_item[0])} for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0],None) is not None]
 
     #List of unique regions
-    unique_region_list = list(set(x for y in region_list for x in y))
+    unique_region_list = []
+    for y in region_list:
+        if type(y) == type('') and y != '':
+            unique_region_list.append(y)
+        elif type(y) == ():
+            for x in y:
+                unique_region_list.append(x)
+        else:
+            continue
+    
+    unique_region_list = list(set(unique_region_list))
     
     #total number of outlinks
     link_total = len(list_of_links)
