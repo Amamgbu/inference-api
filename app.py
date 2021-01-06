@@ -1,6 +1,5 @@
 import flask
 from flask import Flask,jsonify,request, render_template
-import pandas as pd
 import mwapi
 import time
 import bz2  # necessary for decompressing dump file into text format
