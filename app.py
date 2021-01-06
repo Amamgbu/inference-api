@@ -414,14 +414,13 @@ def get_summary_stats(list_of_links,threshold=0.5):
     percentage_dict = dict(sorted(percentage_dict.items(), key=lambda x: x[1], reverse=True))
     link_summ_list = [{'region':x[0],'link-count':x[1],'percent-dist':y[1]} for x,y in zip(final_dict.items(),percentage_dict.items()) ]
     
-    summary_stats = {
+    summary_stats = summary_stats = {
         'regions': unique_region_list,
-        'unique region count': len(unique_region_list),
-        'Link distribution per region':final_dict,
-        'Percentage distribution of links per region': percentage_dict,
-        'Above Threshold':above_threshold,
-        'Below Threshold': below_threshold,
-        'Region prediction based on link-region frequency':[k for k,v in final_dict.items() if v == max_val]
+        'unique-count': len(unique_region_list),
+        'link-percent-count-dist': link_summ_list,
+        'above-threshold':above_threshold,
+        'below-threshold': below_threshold,
+        'region-prediction':[k for k,v in final_dict.items() if v == max_val]
 
 
     }
