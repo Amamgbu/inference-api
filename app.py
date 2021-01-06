@@ -11,19 +11,29 @@ app = Flask(__name__)
 
 
 #On app start, process data and save as dict
+with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
+    unique = list(set(region for item in file for region in json.loads(item)['region_list']))
+
+    #Country to integer/Integer to countries dict
+    country_integer_dict = {country:i for i,country in enumerate(unique) }
+    integer_country_dict = {i:country for i,country in enumerate(unique) }
+
 cleaned_dict = {}
 with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
-    for i,item in enumerate(file):
-        data = json.loads(item)
+    for i,new_item in enumerate(file):
+        data = json.loads(new_item)
         if len(data['region_list']) > 1:
+            for i in range(len(data['region_list'])):
+                data['region_list'][i] = country_integer_dict[data['region_list'][i]]
             cleaned_dict[data['item']] = tuple(data['region_list'])
         elif len(data['region_list']) == 1:
-            cleaned_dict[data['item']] = data['region_list'][0]
+            cleaned_dict[data['item']] = country_integer_dict[data['region_list'][0]]
         else:
-            cleaned_dict[data['item']] = None
+            cleaned_dict[data['item']] = ''
+
         if i%100000 == 0:
             print('{0} lines processed'.format(i))
-            
+                    
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -299,6 +309,8 @@ def get_summary_stats(list_of_links,threshold=0.5):
     output: returns a dict containing summary stats
     
     '''
+    
+    start_time = time.time()
     region_list = [] #List containing unique regions per outlink
     
     link_list = [] #List of outlink_dict
@@ -308,10 +320,10 @@ def get_summary_stats(list_of_links,threshold=0.5):
     summary_stats = {}
     percentage_dict = {}
     
-    region_list = [cleaned_dict.get(outlink_item[0]) for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0],None) is not None]
     
-    link_list = [{outlink_item[1]: cleaned_dict.get(outlink_item[0])} for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0],None) is not None]
-
+    region_list = [integer_country_dict.get(cleaned_dict.get(outlink_item[0])) for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0])]
+    
+    link_list = [{outlink_item[1]: integer_country_dict.get(cleaned_dict.get(outlink_item[0]))} for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0])]
     #List of unique regions
     unique_region_list = []
     for y in region_list:
@@ -325,6 +337,8 @@ def get_summary_stats(list_of_links,threshold=0.5):
     
     unique_region_list = list(set(unique_region_list))
     
+    #unique_region_list = list(set(x for y in region_list for x in y))
+    
     #total number of outlinks
     link_total = len(list_of_links)
     #Loop through unique regions
@@ -332,14 +346,17 @@ def get_summary_stats(list_of_links,threshold=0.5):
         #Give region an initial value of 0
         final_dict[region] = 0
         #Loop through list of outlink dicts and take count of number of outlinks that contain a region
+        
         for link in link_list:
             #Check if region occurs in an outlink and increment by 1
-            if region in list(link.values())[0]:
-                final_dict[region] = final_dict[region] + 1
+            if list(link.values())[0]:
+                if region in list(link.values())[0]:
+                    final_dict[region] = final_dict[region] + 1
 
         percentage_dict[region] = round(100 * final_dict[region]/link_total,2)
     
     max_val = max(final_dict.values(),default=0)    
+    
     
     #Check if threshold is an integer, if not convert
     if type(threshold) != int and not None and type(threshold) != float:
@@ -350,12 +367,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
                 if threshold > 1:
                     threshold = int(threshold)
                     #Contains regions with frequency of occurence above set threshold
-                    above_threshold = [k for k,v in final_dict.items() if v >= threshold]
+                    above_threshold = [k for k,v in final_dict.items() if v > threshold]
 
                     #Contains regions with frequency of occurence below set threshold
                     below_threshold = [k for k,v in final_dict.items() if v < threshold]
                 else:
-                    above_threshold = [k for k,v in final_dict.items() if v >= threshold * link_total]
+                    above_threshold = [k for k,v in final_dict.items() if v > threshold * link_total]
                     below_threshold = [k for k,v in final_dict.items() if v < threshold * link_total]
             except:
                 error = "Threshold passed is not a number. Please input a number and try again."
@@ -366,7 +383,7 @@ def get_summary_stats(list_of_links,threshold=0.5):
             try:
                 threshold = int(threshold)
                 #Contains regions with frequency of occurence above set threshold
-                above_threshold = [k for k,v in final_dict.items() if v >= threshold]
+                above_threshold = [k for k,v in final_dict.items() if v > threshold]
                 
                 #Contains regions with frequency of occurence below set threshold
                 below_threshold = [k for k,v in final_dict.items() if v < threshold]
@@ -375,12 +392,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
                 error = "Threshold passed is not a number. Please input a number and try again."
                 return error
     elif type(threshold) == float:
-        above_threshold = [k for k,v in final_dict.items() if v >= threshold * link_total]
+        above_threshold = [k for k,v in final_dict.items() if v > threshold * link_total]
         below_threshold = [k for k,v in final_dict.items() if v < threshold * link_total]
         
     elif type(threshold) == int:
         #Contains regions with frequency of occurence above set threshold
-        above_threshold = [k for k,v in final_dict.items() if v >= threshold]
+        above_threshold = [k for k,v in final_dict.items() if v > threshold]
                 
         #Contains regions with frequency of occurence below set threshold
         below_threshold = [k for k,v in final_dict.items() if v < threshold]
@@ -388,7 +405,9 @@ def get_summary_stats(list_of_links,threshold=0.5):
     else:
         error = "You have passed in an incorrect argument. Format should either be number or float"
         return error
-    
+        
+            
+        
     
     #Sort final dict and percentage dict by frequency
     final_dict = dict(sorted(final_dict.items(), key=lambda x: x[1], reverse=True))
@@ -397,11 +416,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
     
     summary_stats = {
         'regions': unique_region_list,
-        'unique-count': len(unique_region_list),
-        'link-percent-count-dist': link_summ_list,
-        'above-threshold':above_threshold,
-        'below-threshold': below_threshold,
-        'region-prediction':[k for k,v in final_dict.items() if v == max_val]
+        'unique region count': len(unique_region_list),
+        'Link distribution per region':final_dict,
+        'Percentage distribution of links per region': percentage_dict,
+        'Above Threshold':above_threshold,
+        'Below Threshold': below_threshold,
+        'Region prediction based on link-region frequency':[k for k,v in final_dict.items() if v == max_val]
 
 
     }
@@ -409,4 +429,3 @@ def get_summary_stats(list_of_links,threshold=0.5):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
