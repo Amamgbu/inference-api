@@ -144,7 +144,9 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('form label.placeholder').each(function() {
-				$(this).addClass('off');
+				if (!$('input, textarea, select', this).val()) {
+	 				$(this).addClass('off');
+				}
 				$(this).on('focusin', function() {
 					$(this).removeClass('off');
 				});

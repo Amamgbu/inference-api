@@ -1,39 +1,55 @@
-import flask
 from flask import Flask,jsonify,request, render_template
 import mwapi
 import time
 import bz2  # necessary for decompressing dump file into text format
 import json
-import sys
-
 
 app = Flask(__name__)
 
+# This should work but could be more efficient:
+#
+#   1) You're looping through the .json.bz2 file twice and there's overhead for that. You can rewrite this so you build the
+#   country_integer_dict and integer_country_dict objects at the same time as you build the cleaned_dict.
+#   I did this and it went from 40 to 25 seconds for starting up
+#
+#   2) For items without regions, that's actually somewhat of a mistake and you can skip those (the else clause)
+#   They are items that had coordinates but couldn't be geolocated to a country and can be treated the same as articles w/o groundtruth
+#
+#   3) Now that this has gotten more complicated, we should probably move it to a function (and then just call the function after you define it)
+#   You'll have to keep the INTEGER_COUNTRY_DICT and CLEANED_DICT instantiations outside of the function so they persist after loading in the data
+#   But this will cleanup the objects you don't need after building CLEANED_DICT (mainly `unique` and `country_integer_dict`)
 
+# Below I changed the style of variable names. I use ALL_CAPS when instantiating global variables -- i.e. objects that will be used inside other functions
+# This applies to INTEGER_COUNTRY_DICT and CLEANED_DICT but not the others.
 #On app start, process data and save as dict
 with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
     unique = list(set(region for item in file for region in json.loads(item)['region_list']))
 
     #Country to integer/Integer to countries dict
-    country_integer_dict = {country:i for i,country in enumerate(unique) }
-    integer_country_dict = {i:country for i,country in enumerate(unique) }
+    country_integer_dict = {country:i for i, country in enumerate(unique)}
+    INTEGER_COUNTRY_DICT = {i:country for i, country in enumerate(unique)}
 
-cleaned_dict = {}
+CLEANED_DICT = {}
 with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
     for i,new_item in enumerate(file):
         data = json.loads(new_item)
         if len(data['region_list']) > 1:
             for i in range(len(data['region_list'])):
                 data['region_list'][i] = country_integer_dict[data['region_list'][i]]
-            cleaned_dict[data['item']] = tuple(data['region_list'])
+            CLEANED_DICT[data['item']] = tuple(data['region_list'])
         elif len(data['region_list']) == 1:
-            cleaned_dict[data['item']] = country_integer_dict[data['region_list'][0]]
+            CLEANED_DICT[data['item']] = country_integer_dict[data['region_list'][0]]
         else:
-            cleaned_dict[data['item']] = ''
+            CLEANED_DICT[data['item']] = ''
 
         if i%100000 == 0:
             print('{0} lines processed'.format(i))
-                    
+
+# not a priority, but if you want to be able to pass URL parameters to pre-fill the form fields
+# e.g., https://experimental-embeddings.toolforge.org/?lang=en&page_title=La_Pintana
+# You can do this by passing them to index.html here and making some small changes to index.html
+# You can see an example here where I enabled it for a different interface:
+# https://github.com/geohci/list-building-interface/commit/540ee8e93d68077825ab2f9e0fede84aa576935a
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -85,11 +101,16 @@ def validate_api_args():
     else:
         error = 'missing language -- e.g., "en" for English -- and title -- e.g., "2005_World_Series" for <a href="https://en.wikipedia.org/wiki/2005_World_Series">https://en.wikipedia.org/wiki/2005_World_Series</a>'
 
+    # Doesn't need to be changed yet but I think down the line we might want to break this into two separate parameters:
+    # `min_link_count` and `min_link_prop`
+    # This way you could do things like say that above_threshold is at least 2 links and >5% of links
+    # Conveniently, this will also simplify a lot of the int vs. float logic you have to use to figure out what threshold is
     if 'threshold' in request.args:
         try:
             threshold = float(request.args['threshold'])
         except ValueError:
-            threshold = "Error: threshold value provided not a float: {0}".format(request.args['threshold'])
+            # if can't parse threshold, should return an error
+            error = "Error: threshold value provided not a float: {0}".format(request.args['threshold'])
 
 
     return lang,title,error,threshold
@@ -118,10 +139,11 @@ def get_outlinks(title,language,session=None):
     
     #If there is no session set, set one
     if session is None:
-        SITENAME = '{0}.wikipedia'.format(language.lower())
+        # I use all caps variable names when they are global, otherwise lowercase
+        sitename = '{0}.wikipedia'.format(language.lower())
         test_label = 'Inference API Outreachy (mwapi)'
         contact_email = 'isaac@wikimedia.org'
-        session = mwapi.Session('https://{0}.org'.format(SITENAME), user_agent='{0} -- {1}'.format(test_label, contact_email))
+        session = mwapi.Session('https://{0}.org'.format(sitename), user_agent='{0} -- {1}'.format(test_label, contact_email))
     
     
     #Initialize outlinks list
@@ -135,7 +157,14 @@ def get_outlinks(title,language,session=None):
           'redirects':'',
           'gplnamespace':0,
           'titles':'|'.join(title)}
-    
+
+    # we set this as low priority a while back because it wasn't working for you but you can make this code much cleaner by using mwapi's continuation parameter
+    # specifically, just change to: results = session.get(params, continuation=True)
+    # and then instead of it being a single dictionary, it's a generator of dictionaries
+    # so you do something like:
+    # for result in results:
+    #  ...
+    # and you don't need the additional logic around results.get(continue...
     result = session.get(params)
     #This is the initial title passed into argument
     old_title = title
@@ -221,10 +250,11 @@ def get_inlinks(title,language,session=None):
     
     #If there is no session set, set one
     if session is None:
-        SITENAME = '{0}.wikipedia'.format(language.lower())
+        # I use all caps variable names when they are global, otherwise lowercase
+        sitename = '{0}.wikipedia'.format(language.lower())
         test_label = 'Inference API Outreachy (mwapi)'
         contact_email = 'isaac@wikimedia.org'
-        session = mwapi.Session('https://{0}.org'.format(SITENAME), user_agent='{0} -- {1}'.format(test_label, contact_email))
+        session = mwapi.Session('https://{0}.org'.format(sitename), user_agent='{0} -- {1}'.format(test_label, contact_email))
     
     
     #Initialize inlinks list
@@ -242,7 +272,7 @@ def get_inlinks(title,language,session=None):
     result = session.get(params)
     #This is the initial title passed into argument
     old_title = title
-    
+    # see comment in get_outlinks about mwapi and continuation
     try:
         if result.get('continue',None) is None:
             for pid in result['query']['pages']:
@@ -313,7 +343,7 @@ def get_summary_stats(list_of_links,threshold=0.5):
     output: returns a dict containing summary stats
     
     '''
-    
+    # TODO: some unused variables here that can be removed
     start_time = time.time()
     region_list = [] #List containing unique regions per outlink
     
@@ -325,11 +355,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
     percentage_dict = {}
     
     
-    region_list = [integer_country_dict.get(cleaned_dict.get(outlink_item[0])) for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0])]
+    region_list = [INTEGER_COUNTRY_DICT.get(CLEANED_DICT.get(outlink_item[0])) for outlink_item in list_of_links if CLEANED_DICT.get(outlink_item[0])]
     
-    link_list = [{outlink_item[1]: integer_country_dict.get(cleaned_dict.get(outlink_item[0]))} for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0])]
+    link_list = [{outlink_item[1]: INTEGER_COUNTRY_DICT.get(CLEANED_DICT.get(outlink_item[0]))} for outlink_item in list_of_links if CLEANED_DICT.get(outlink_item[0])]
     #List of unique regions
     unique_region_list = []
+    # would be nice to use more descriptive variable names than x and y when the variables are more than just super simple objects
     for y in region_list:
         if type(y) == type('') and y != '':
             unique_region_list.append(y)
@@ -358,11 +389,21 @@ def get_summary_stats(list_of_links,threshold=0.5):
                     final_dict[region] = final_dict[region] + 1
 
         percentage_dict[region] = round(100 * final_dict[region]/link_total,2)
-    
+
+    # Not clear to me why there's a distinction between above_threshold and using max_val to identify the most-heavily linked region
+    # What's the reason for the regions above the threshold not being treated as the "predicted" regions?
     max_val = max(final_dict.values(),default=0)    
     
     
     #Check if threshold is an integer, if not convert
+    # I think maybe a typo here with the "and not None" clause?
+    # You can probably clean this code up a bit by having first a set of clauses that convert the threshold into either float or int
+    # You could even make that into a separate function if you'd like
+    # And then having a second set of clauses that do the above_threshold / below_threshold determination
+    # Right now links might also be neither above or below threshold
+    # For example, if threshold is 5 links and a region has five links it is not >5 nor is it <5
+    # One of those inequalities needs to be made inclusive (>= or <=) -- I'll leave that to you
+    # But all possible situations should fit into either above_threshold or below_threshold (but not neither or both)
     if type(threshold) != int and not None and type(threshold) != float:
         #Check if threshold is a string float e.g "2.3" and convert to actual float
         if '.' in threshold:
@@ -416,8 +457,10 @@ def get_summary_stats(list_of_links,threshold=0.5):
     #Sort final dict and percentage dict by frequency
     final_dict = dict(sorted(final_dict.items(), key=lambda x: x[1], reverse=True))
     percentage_dict = dict(sorted(percentage_dict.items(), key=lambda x: x[1], reverse=True))
+    # you could simplify this by never explicitly creating percentage_dict and just doing round(100 * x[1]/link_total,2) here
     link_summ_list = [{'region':x[0],'link-count':x[1],'percent-dist':y[1]} for x,y in zip(final_dict.items(),percentage_dict.items()) ]
-    
+
+    # I think just a typo here with the double assignment
     summary_stats = summary_stats = {
         'regions': unique_region_list,
         'unique-count': len(unique_region_list),
