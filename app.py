@@ -296,7 +296,7 @@ def get_inlinks(title,language,session=None):
                             #Added a cap of 5000
                             if inlinks > 5000:
                                 inlinks = inlinks[:5000]
-                                break
+                                return inlinks
             
                 check_continue = result.get('continue',None)
             return inlinks
