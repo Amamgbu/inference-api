@@ -293,7 +293,10 @@ def get_inlinks(title,language,session=None):
                         if qid is not None:
                             inlink_title = result['query']['pages'][pid].get('title',None)
                             inlinks.append((qid,inlink_title))
-                    
+                            #Added a cap of 5000
+                            if inlinks > 5000:
+                                inlinks = inlinks[:5000]
+                                break
             
                 check_continue = result.get('continue',None)
             return inlinks
