@@ -95,7 +95,7 @@
 										<option value="en">English</option>
 										<option value="fr">French</option>
 									  </select>
-									<!-- <input type="text" value="" placeholder="Placeholder text" id="lang"/> -->
+									
 								</label>
 							</div>
 							<div class="col col1">
@@ -144,7 +144,9 @@
 	<script type="text/javascript">
 		$(document).ready(function() {
 			$('form label.placeholder').each(function() {
-				$(this).addClass('off');
+				if (!$('input, textarea, select', this).val()) {
+	 				$(this).addClass('off');
+				}
 				$(this).on('focusin', function() {
 					$(this).removeClass('off');
 				});
@@ -171,20 +173,21 @@
 				$("#country-results").append("<br><p>Error: " + data["Error"] + "</p>");
 			}
 			else {
+				console.log(data);
 				$("#country-results").append('<br><h3><a href="' + data["article"] + '">' + document.getElementById('title').value + '</a></h3>');
 				$("#country-results").append('<ol>');
 				$("#country-results").append('<li><b>Total Number of Outlinks: ' + data['results']['outlink_count']);
 				$("#country-results").append('<li><b>Total Number of Inlinks: ' + data['results']['inlink_count']);
 				$("#country-results").append('</ol>');
 
-				if (data['results']['outlink_summary']['region-prediction'].length > 0){
+				if (data['results']['outlink_summary']['regions'].length > 0){
 					$("#country-results").append('<br><h2> Outlink Summary </h2>')
 					$("#country-results").append('<div class="link-legend"><div class="legend-title">Outlink Threshold Guide</div><div class="legend-scale"><ul class="legend-labels"><li><span style="background:#bae4bc;"></span>Above</li><li><span style="background:#fdae6b;"></span>Below</li></ul></div></div>')
 					$("#country-results").append('<table id="outlink-summary-table" class="display"><thead><tr><th>Region</th><th>Outlink Count</th><th>Percentage distribution of outlinks (%)</th></tr></thead></table>')
 				}else{
 					$("#country-results").append("<li><No outlink summary generated.</li>");
 				}
-				if (data['results']['inlink_summary']['region-prediction'].length > 0){
+				if (data['results']['inlink_summary']['regions'].length > 0){
 					$("#country-results").append('<br><h2> Inlink Summary </h2>')
 					$("#country-results").append('<div class="link-legend"><div class="legend-title">Inlink Threshold Guide</div><div class="legend-scale"><ul class="legend-labels"><li><span style="background:#bae4bc;"></span>Above</li><li><span style="background:#fdae6b;"></span>Below</li></ul></div></div>')
 					$("#country-results").append('<table id="inlink-summary-table" class="display"><thead><tr><th>Region</th><th>Inlink Count</th><th>Percentage distribution of inlinks (%)</th></tr></thead></table>')
@@ -258,7 +261,7 @@
 				  );
 			}
 
-			var queryUrl = "https://experimental-embeddings.toolforge.org/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
+			var queryUrl = "http://127.0.0.1:5000/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
 			$.ajax(queryUrl, {success: render_categories.bind(this),
 							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
 							  }

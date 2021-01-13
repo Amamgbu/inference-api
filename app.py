@@ -1,42 +1,57 @@
-import flask
 from flask import Flask,jsonify,request, render_template
 import mwapi
-import time
 import bz2  # necessary for decompressing dump file into text format
 import json
-import sys
 
 
 app = Flask(__name__)
 
+#Instantiate global variables
+CLEANED_DICT = {}
+INTEGER_COUNTRY_DICT = {}
 
-#On app start, process data and save as dict
-with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
-    unique = list(set(region for item in file for region in json.loads(item)['region_list']))
+def load_data(raw_data_path):
+    '''
+    Description: On app start, process data and save as dict
+    output: cleaned_dict,integer_country_dict
+    '''
+    global CLEANED_DICT
+    global INTEGER_COUNTRY_DICT
 
-    #Country to integer/Integer to countries dict
-    country_integer_dict = {country:i for i,country in enumerate(unique) }
-    integer_country_dict = {i:country for i,country in enumerate(unique) }
+    with bz2.open(raw_data_path, "rt") as file:
+        unique = list(set(region for item in file for region in json.loads(item)['region_list']))
 
-cleaned_dict = {}
-with bz2.open("data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2", "rt") as file:
-    for i,new_item in enumerate(file):
-        data = json.loads(new_item)
-        if len(data['region_list']) > 1:
-            for i in range(len(data['region_list'])):
-                data['region_list'][i] = country_integer_dict[data['region_list'][i]]
-            cleaned_dict[data['item']] = tuple(data['region_list'])
-        elif len(data['region_list']) == 1:
-            cleaned_dict[data['item']] = country_integer_dict[data['region_list'][0]]
-        else:
-            cleaned_dict[data['item']] = ''
+        #Country to integer/Integer to countries dict
+        country_integer_dict = {country:i for i,country in enumerate(unique) }
+        INTEGER_COUNTRY_DICT = {i:country for i,country in enumerate(unique) }
+        
+        #Goes back to beginning of file
+        file.seek(0)
 
-        if i%100000 == 0:
-            print('{0} lines processed'.format(i))
-                    
+        #Loop through file
+        for i,new_item in enumerate(file):
+            data = json.loads(new_item)
+            if len(data['region_list']) > 1:
+                for i in range(len(data['region_list'])):
+                    data['region_list'][i] = country_integer_dict[data['region_list'][i]]
+                CLEANED_DICT[data['item']] = tuple(data['region_list'])
+            elif len(data['region_list']) == 1:
+                CLEANED_DICT[data['item']] = country_integer_dict[data['region_list'][0]]
+            else:
+                continue
+
+            if i%100000 == 0:
+                print('{0} lines processed'.format(i))
+         
+#Raw data path
+raw_data = "data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2"
+#Load bz2 file    
+load = load_data(raw_data)
+
 @app.route('/')
 def index():
-    return render_template('index.html')
+    lang,title,error,threshold = validate_api_args()
+    return render_template('index.html',title=title, lang=lang,threshold=threshold)
 
 
 @app.route('/api/v1/get-summary',methods=['GET'])
@@ -89,7 +104,7 @@ def validate_api_args():
         try:
             threshold = float(request.args['threshold'])
         except ValueError:
-            threshold = "Error: threshold value provided not a float: {0}".format(request.args['threshold'])
+            error = "Error: threshold value provided not a float: {0}".format(request.args['threshold'])
 
 
     return lang,title,error,threshold
@@ -118,10 +133,10 @@ def get_outlinks(title,language,session=None):
     
     #If there is no session set, set one
     if session is None:
-        SITENAME = '{0}.wikipedia'.format(language.lower())
+        sitename = '{0}.wikipedia'.format(language.lower())
         test_label = 'Inference API Outreachy (mwapi)'
         contact_email = 'isaac@wikimedia.org'
-        session = mwapi.Session('https://{0}.org'.format(SITENAME), user_agent='{0} -- {1}'.format(test_label, contact_email))
+        session = mwapi.Session('https://{0}.org'.format(sitename), user_agent='{0} -- {1}'.format(test_label, contact_email))
     
     
     #Initialize outlinks list
@@ -136,67 +151,20 @@ def get_outlinks(title,language,session=None):
           'gplnamespace':0,
           'titles':'|'.join(title)}
     
-    result = session.get(params)
+    results = session.get(params,continuation=True)
     #This is the initial title passed into argument
-    old_title = title
-    try:
-        if result.get('continue',None) is None:
-            for pid in result['query']['pages']:
-                #If page is not missing, Get only articles
-                if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
-                    #Get wikidata id
-                    qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
-                        
-                    if qid is not None:
-                        #Get outlink title
-                        outlink_title = result['query']['pages'][pid].get('title',None)
-                        outlinks.append((qid,outlink_title))    
-                
-            return outlinks
-        else:
-            #Get initial results
-            for pid in result['query']['pages']:
-                if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
-                    #Get wikidata id
-                    qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
-                    if qid is not None:
-                        outlink_title = result['query']['pages'][pid].get('title',None)
-                        outlinks.append((qid,outlink_title))
-                
-            #check for continue parameter
-            check_continue = result.get('continue',None)
-            
-            #extract value to continue from
-            while check_continue is not None:
-                cont_val = result.get('continue').get('gplcontinue')
-                params = {'action':'query',
-                          'generator':'links',
-                          'prop': 'pageprops',
-                          'ppprop':'wikibase_item',
-                          'gpllimit':500,
-                          'gplcontinue':cont_val,
-                          'titles':'|'.join(old_title),
-                          'redirects':'',
-                          'gplnamespace':0
-
-                         }
-                result = session.get(params)
-                for pid in result['query']['pages']:
-                    if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
-                        #Get wikidata id
-                        qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
-                        
-                        if qid is not None:
-                            outlink_title = result['query']['pages'][pid].get('title',None)
-                            outlinks.append((qid,outlink_title))
-                    
-            
-                check_continue = result.get('continue',None)
-            return outlinks
+    for result in results:
+        for pid in result['query']['pages']:
+            #If page is not missing, Get only articles
+            if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
+                #Get wikidata id
+                qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
+                if qid is not None:
+                    #Get outlink title
+                    outlink_title = result['query']['pages'][pid].get('title',None)
+                    outlinks.append((qid,outlink_title))    
         
-                        
-    except:
-        return None
+    return outlinks
 
 def get_inlinks(title,language,session=None):
     """
@@ -221,10 +189,10 @@ def get_inlinks(title,language,session=None):
     
     #If there is no session set, set one
     if session is None:
-        SITENAME = '{0}.wikipedia'.format(language.lower())
+        sitename = '{0}.wikipedia'.format(language.lower())
         test_label = 'Inference API Outreachy (mwapi)'
         contact_email = 'isaac@wikimedia.org'
-        session = mwapi.Session('https://{0}.org'.format(SITENAME), user_agent='{0} -- {1}'.format(test_label, contact_email))
+        session = mwapi.Session('https://{0}.org'.format(sitename), user_agent='{0} -- {1}'.format(test_label, contact_email))
     
     
     #Initialize inlinks list
@@ -239,72 +207,26 @@ def get_inlinks(title,language,session=None):
           'glhnamespace':0,
           'titles':'|'.join(title)}
     
-    result = session.get(params)
+    results = session.get(params,continuation=True)
     #This is the initial title passed into argument
-    old_title = title
-    
-    try:
-        if result.get('continue',None) is None:
-            for pid in result['query']['pages']:
-                #If page is not missing, Get only articles
-                if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
-                    #Get wikidata id
-                    qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
-                        
-                    if qid is not None:
-                        #Get outlink title
-                        inlink_title = result['query']['pages'][pid].get('title',None)
-                        inlinks.append((qid,inlink_title))    
-                
-            return inlinks
-        else:
-            #Get initial results
-            for pid in result['query']['pages']:
-                if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
-                    #Get wikidata id
-                    qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
-                    if qid is not None:
-                        inlink_title = result['query']['pages'][pid].get('title',None)
-                        inlinks.append((qid,inlink_title))
-                
-            #check for continue parameter
-            check_continue = result.get('continue',None)
-            
-            #extract value to continue from
-            while check_continue is not None:
-                cont_val = result.get('continue').get('glhcontinue')
-                params = {'action':'query',
-                          'generator':'linkshere',
-                          'prop': 'pageprops',
-                          'ppprop':'wikibase_item',
-                          'glhlimit':500,
-                          'glhcontinue':cont_val,
-                          'titles':'|'.join(old_title),
-                          'redirects':'',
-                          'glhnamespace':0
-
-                         }
-                result = session.get(params)
-                for pid in result['query']['pages']:
-                    if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
-                        #Get wikidata id
-                        qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
-                        
-                        if qid is not None:
-                            inlink_title = result['query']['pages'][pid].get('title',None)
-                            inlinks.append((qid,inlink_title))
+    for result in results:
+        for pid in result['query']['pages']:
+            #If page is not missing, Get only articles
+            if result['query']['pages'][pid].get('ns') == 0 and 'missing' not in result['query']['pages'][pid]:
+                #Get wikidata id
+                qid = result['query']['pages'][pid].get('pageprops',{}).get('wikibase_item',None)
                     
-                    #Added a cap of 5000
+                if qid is not None:
+                    #Get outlink title
+                    inlink_title = result['query']['pages'][pid].get('title',None)
+                    inlinks.append((qid,inlink_title))
+                    #Break loop if inlinks is greater than 5000
                     if len(inlinks) > 5000:
                         inlinks = inlinks[:5000]
-                        return inlinks
+                        return inlinks   
             
-                check_continue = result.get('continue',None)
-            return inlinks
-        
-                        
-    except:
-        return None
+    return inlinks
+
 
 def get_summary_stats(list_of_links,threshold=0.5):
     '''
@@ -313,23 +235,23 @@ def get_summary_stats(list_of_links,threshold=0.5):
     output: returns a dict containing summary stats
     
     '''
+    global INTEGER_COUNTRY_DICT
+    global CLEANED_DICT
+
     
-    start_time = time.time()
     region_list = [] #List containing unique regions per outlink
     
     link_list = [] #List of outlink_dict
     
     final_dict = {}#Dict containing count of regions 
-    
-    summary_stats = {}
-    percentage_dict = {}
-    
-    
-    region_list = [integer_country_dict.get(cleaned_dict.get(outlink_item[0])) for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0])]
-    
-    link_list = [{outlink_item[1]: integer_country_dict.get(cleaned_dict.get(outlink_item[0]))} for outlink_item in list_of_links if cleaned_dict.get(outlink_item[0])]
-    #List of unique regions
     unique_region_list = []
+
+    summary_stats = {}
+    
+    
+    region_list = [INTEGER_COUNTRY_DICT.get(CLEANED_DICT.get(outlink_item[0])) for outlink_item in list_of_links if CLEANED_DICT.get(outlink_item[0])]
+    link_list = [{outlink_item[1]: INTEGER_COUNTRY_DICT.get(CLEANED_DICT.get(outlink_item[0]))} for outlink_item in list_of_links if CLEANED_DICT.get(outlink_item[0])]
+    #List of unique regions
     for y in region_list:
         if type(y) == type('') and y != '':
             unique_region_list.append(y)
@@ -340,8 +262,6 @@ def get_summary_stats(list_of_links,threshold=0.5):
             continue
     
     unique_region_list = list(set(unique_region_list))
-    
-    #unique_region_list = list(set(x for y in region_list for x in y))
     
     #total number of outlinks
     link_total = len(list_of_links)
@@ -357,13 +277,10 @@ def get_summary_stats(list_of_links,threshold=0.5):
                 if region in list(link.values())[0]:
                     final_dict[region] = final_dict[region] + 1
 
-        percentage_dict[region] = round(100 * final_dict[region]/link_total,2)
-    
-    max_val = max(final_dict.values(),default=0)    
-    
+        
     
     #Check if threshold is an integer, if not convert
-    if type(threshold) != int and not None and type(threshold) != float:
+    if type(threshold) != int and type(threshold) != float:
         #Check if threshold is a string float e.g "2.3" and convert to actual float
         if '.' in threshold:
             try:
@@ -371,12 +288,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
                 if threshold > 1:
                     threshold = int(threshold)
                     #Contains regions with frequency of occurence above set threshold
-                    above_threshold = [k for k,v in final_dict.items() if v > threshold]
+                    above_threshold = [k for k,v in final_dict.items() if v >= threshold]
 
                     #Contains regions with frequency of occurence below set threshold
                     below_threshold = [k for k,v in final_dict.items() if v < threshold]
                 else:
-                    above_threshold = [k for k,v in final_dict.items() if v > threshold * link_total]
+                    above_threshold = [k for k,v in final_dict.items() if v >= threshold * link_total]
                     below_threshold = [k for k,v in final_dict.items() if v < threshold * link_total]
             except:
                 error = "Threshold passed is not a number. Please input a number and try again."
@@ -387,7 +304,7 @@ def get_summary_stats(list_of_links,threshold=0.5):
             try:
                 threshold = int(threshold)
                 #Contains regions with frequency of occurence above set threshold
-                above_threshold = [k for k,v in final_dict.items() if v > threshold]
+                above_threshold = [k for k,v in final_dict.items() if v >= threshold]
                 
                 #Contains regions with frequency of occurence below set threshold
                 below_threshold = [k for k,v in final_dict.items() if v < threshold]
@@ -396,12 +313,12 @@ def get_summary_stats(list_of_links,threshold=0.5):
                 error = "Threshold passed is not a number. Please input a number and try again."
                 return error
     elif type(threshold) == float:
-        above_threshold = [k for k,v in final_dict.items() if v > threshold * link_total]
+        above_threshold = [k for k,v in final_dict.items() if v >= threshold * link_total]
         below_threshold = [k for k,v in final_dict.items() if v < threshold * link_total]
         
     elif type(threshold) == int:
         #Contains regions with frequency of occurence above set threshold
-        above_threshold = [k for k,v in final_dict.items() if v > threshold]
+        above_threshold = [k for k,v in final_dict.items() if v >= threshold]
                 
         #Contains regions with frequency of occurence below set threshold
         below_threshold = [k for k,v in final_dict.items() if v < threshold]
@@ -415,17 +332,15 @@ def get_summary_stats(list_of_links,threshold=0.5):
     
     #Sort final dict and percentage dict by frequency
     final_dict = dict(sorted(final_dict.items(), key=lambda x: x[1], reverse=True))
-    percentage_dict = dict(sorted(percentage_dict.items(), key=lambda x: x[1], reverse=True))
-    link_summ_list = [{'region':x[0],'link-count':x[1],'percent-dist':y[1]} for x,y in zip(final_dict.items(),percentage_dict.items()) ]
+    link_summ_list = [{'region':x[0],'link-count':x[1],'percent-dist':round(100 * int(x[1])/link_total,2)} for x in final_dict.items() ]
     
-    summary_stats = summary_stats = {
+    summary_stats = {
         'regions': unique_region_list,
         'unique-count': len(unique_region_list),
         'link-percent-count-dist': link_summ_list,
         'above-threshold':above_threshold,
-        'below-threshold': below_threshold,
-        'region-prediction':[k for k,v in final_dict.items() if v == max_val]
-
+        'below-threshold': below_threshold
+        
 
     }
     return summary_stats 
