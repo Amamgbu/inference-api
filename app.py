@@ -124,7 +124,7 @@ def get_outlinks(title,language,session=None):
     
     """
     #if title is not a list and not None, convert to list
-    if type(title) != type('') and hasattr(title, "__iter__"):
+    if type(title) != str and hasattr(title, "__iter__"):
         pass
     elif title is None:
         return None
@@ -180,7 +180,7 @@ def get_inlinks(title,language,session=None):
     
     """
     #if title is not a list and not None, convert to list
-    if type(title) != type('') and hasattr(title, "__iter__"):
+    if type(title) != str and hasattr(title, "__iter__"):
         pass
     elif title is None:
         return None
@@ -253,9 +253,9 @@ def get_summary_stats(list_of_links,threshold=0.5):
     link_list = [{outlink_item[1]: INTEGER_COUNTRY_DICT.get(CLEANED_DICT.get(outlink_item[0]))} for outlink_item in list_of_links if CLEANED_DICT.get(outlink_item[0])]
     #List of unique regions
     for y in region_list:
-        if type(y) == type('') and y != '':
+        if type(y) == str and y != '':
             unique_region_list.append(y)
-        elif type(y) == ():
+        elif type(y) == tuple:
             for x in y:
                 unique_region_list.append(x)
         else:
