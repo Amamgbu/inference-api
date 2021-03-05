@@ -4,12 +4,14 @@
 
 <script>
 // import HelloWorld from "./components/HelloWorld.vue";
+import Introduction from "./components/Introduction.vue";
 import TopBar from "./components/TopBar.vue";
 
 export default {
   name: "App",
   components: {
     // HelloWorld
+    Introduction,
     TopBar,
   }
 };
