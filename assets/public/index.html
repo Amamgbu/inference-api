@@ -267,7 +267,8 @@
 				  );
 			}
 
-			var queryUrl = "https://experimental-embeddings.toolforge.org/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
+			// TODO: API URL from configuration.
+			var queryUrl = "/api/v1/get-summary?lang=" + document.getElementById('lang').value + "&title=" + document.getElementById('title').value +"&threshold="+document.getElementById('threshold').value;
 			$.ajax(queryUrl, {success: render_categories.bind(this),
 							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
 							  }
