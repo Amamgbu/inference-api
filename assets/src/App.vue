@@ -1,5 +1,5 @@
 <template>
-	<top-bar />
+  <top-bar />
   <tool-holder />
   <info-footer />
 </template>
@@ -16,7 +16,7 @@ export default {
     // HelloWorld
     InfoFooter,
     ToolHolder,
-    TopBar,
+    TopBar
   }
 };
 </script>
