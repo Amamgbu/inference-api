@@ -33,7 +33,7 @@
 
 <script>
   // TODO: Stop using jQuery.
-  import {$} from 'jquery';
+  import $ from 'jquery';
 
     $(document).ready(function() {
         $('form label.placeholder').each(function() {
