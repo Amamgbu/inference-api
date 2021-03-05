@@ -1,15 +1,16 @@
 <template>
-<!-- TODO: migrate top-level content to here. -->
-<div></div>
+	<TopBar />
 </template>
 
 <script>
 // import HelloWorld from "./components/HelloWorld.vue";
+import TopBar from "./components/TopBar.vue";
 
 export default {
   name: "App",
   components: {
     // HelloWorld
+    TopBar,
   }
 };
 </script>
