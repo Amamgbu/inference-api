@@ -35,7 +35,7 @@
   // TODO: Stop using jQuery.
   import $ from 'jquery';
 
-    $(document).ready(function() {
+    $(function() {
         $('form label.placeholder').each(function() {
             if (!$('input, textarea, select', this).val()) {
                 $(this).addClass('off');
@@ -50,10 +50,10 @@
             });
             $('*[placeholder]', this).attr('placeholder', '');
         });
-    });
     
-    $('#btnSubmit').click(function (e) {
-        e.preventDefault(); queryCountryAPI();
+        $('#btnSubmit').click(function (e) {
+            e.preventDefault(); queryCountryAPI();
+        });
     });
 
     var render_categories = function(data) {
