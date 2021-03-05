@@ -28,3 +28,43 @@
     </div>
   </footer>
 </template>
+
+<style lang="scss">
+#tool_footer {
+  padding-top: 2.4rem;
+  font-size: 1.2rem;
+  padding-bottom: 2.4rem;
+}
+
+#tool_footer-in {
+  & > * + * {
+    padding-top: 1.6rem;
+  }
+
+  & > p + p {
+    margin-top: 0;
+  }
+
+  ul {
+    margin-top: -0.4rem;
+    margin-left: -0.4rem;
+  }
+
+  li {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 0.4rem;
+  }
+
+  li a {
+    display: block;
+    padding: 0 0.4rem;
+  }
+
+  li + li {
+    margin-left: 0.4rem;
+    padding-left: 0.4rem;
+    border-left: 1px solid var(--grey1);
+  }
+}
+</style>

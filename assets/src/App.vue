@@ -22,7 +22,7 @@ export default {
 </script>
 
 <style lang="scss">
-@use 'assets/legacy.css';
+@use 'assets/legacy.scss';
 
 #app {
   -webkit-font-smoothing: antialiased;
