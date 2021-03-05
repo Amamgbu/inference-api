@@ -34,6 +34,7 @@
 <script>
   // TODO: Stop using jQuery.
   import $ from 'jquery';
+  import 'datatables/media/js/jquery.dataTables.min.js';
 
     $(function() {
         $('form label.placeholder').each(function() {
