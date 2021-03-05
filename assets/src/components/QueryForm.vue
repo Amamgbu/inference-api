@@ -84,53 +84,49 @@
             }else{
                 $("#country-results").append("<li><No Inlink summary generated.</li>");
             }
-            $(document).ready( function () {
-                var outlink_data = data['results']['outlink_summary']['link-percent-count-dist']
-                var outlink_above_thresh = data['results']['outlink_summary']['above-threshold']
-                var inlink_data = data['results']['inlink_summary']['link-percent-count-dist']
-                var inlink_above_thresh = data['results']['inlink_summary']['above-threshold']
-                
-                $('#outlink-summary-table').DataTable({
-                    data:outlink_data,
-                    ordering:false,
-                    createdRow: function(row,data){
-                        if (outlink_above_thresh.includes(data["region"])){
-                            
-                                $(row).css('background-color','#bae4bc');
-    
-                        }
-                        else{
-                            $(row).css('background-color','#fdae6b');
-                        }
-                    },
-                    columns: [
-                        { data: 'region' },
-                        { data: 'link-count' },
-                        { data: 'percent-dist' }
-                        ]
-                });
-                $('#inlink-summary-table').DataTable({
-                    data:inlink_data,
-                    ordering:false,
-                    createdRow: function(row,data){
-                        if (inlink_above_thresh.includes(data["region"])){
-                                $(row).css('background-color','#bae4bc');
-    
-                        }
-                        else{
-                            $(row).css('background-color','#fdae6b');
-                        }
-                    },
-                    columns: [
-                        { data: 'region' },
-                        { data: 'link-count' },
-                        { data: 'percent-dist' }
-                        ]
-                });
-                
-                });
 
+            var outlink_data = data['results']['outlink_summary']['link-percent-count-dist']
+            var outlink_above_thresh = data['results']['outlink_summary']['above-threshold']
+            var inlink_data = data['results']['inlink_summary']['link-percent-count-dist']
+            var inlink_above_thresh = data['results']['inlink_summary']['above-threshold']
             
+            $('#outlink-summary-table').DataTable({
+                data:outlink_data,
+                ordering:false,
+                createdRow: function(row,data){
+                    if (outlink_above_thresh.includes(data["region"])){
+                        
+                            $(row).css('background-color','#bae4bc');
+
+                    }
+                    else{
+                        $(row).css('background-color','#fdae6b');
+                    }
+                },
+                columns: [
+                    { data: 'region' },
+                    { data: 'link-count' },
+                    { data: 'percent-dist' }
+                    ]
+            });
+            $('#inlink-summary-table').DataTable({
+                data:inlink_data,
+                ordering:false,
+                createdRow: function(row,data){
+                    if (inlink_above_thresh.includes(data["region"])){
+                            $(row).css('background-color','#bae4bc');
+
+                    }
+                    else{
+                        $(row).css('background-color','#fdae6b');
+                    }
+                },
+                columns: [
+                    { data: 'region' },
+                    { data: 'link-count' },
+                    { data: 'percent-dist' }
+                    ]
+            });
         }
     }
 
