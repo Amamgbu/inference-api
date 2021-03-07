@@ -30,21 +30,6 @@ import LanguageSelector from "./LanguageSelector";
 import ThresholdInput from "./ThresholdInput";
 
 $(function() {
-  $("form label.placeholder").each(function() {
-    if (!$("input, textarea, select", this).val()) {
-      $(this).addClass("off");
-    }
-    $(this).on("focusin", function() {
-      $(this).removeClass("off");
-    });
-    $(this).on("focusout", function() {
-      if (!$("input, textarea, select", this).val()) {
-        $(this).addClass("off");
-      }
-    });
-    $("*[placeholder]", this).attr("placeholder", "");
-  });
-
   $("#btnSubmit").click(function(e) {
     e.preventDefault();
     queryCountryAPI();
