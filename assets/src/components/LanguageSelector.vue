@@ -1,9 +1,10 @@
 <template>
-  <label class="placeholder"
+  <label
+    class="placeholder"
     :class="{ off: !isFocused && !modelValue }"
     @focusin="isFocused = true"
     @focusout="isFocused = false"
-  ><span class="field_name">Language code -- e.g., en for English</span>
+    ><span class="field_name">Language code -- e.g., en for English</span>
     <select
       id="lang"
       @input="$emit('update:modelValue', $event.target.value)"
@@ -20,12 +21,12 @@
 export default {
   name: "LanguageSelector",
   props: {
-    modelValue: String,
+    modelValue: String
   },
-  data: function () {
+  data: function() {
     return {
-      isFocused: false,
+      isFocused: false
     };
-  },
-}
+  }
+};
 </script>

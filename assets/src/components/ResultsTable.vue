@@ -9,32 +9,73 @@
           -->
 
           <ol>
-            <br><h3><a :href="this.articleUrl">{{ this.title }}</a></h3>
-            <li><b>Total Number of Outlinks:</b> {{ this.results.outlink_count }}</li>
-            <li><b>Total Number of Inlinks:</b> {{ this.results.inlink_count }}</li>
+            <br />
+            <h3>
+              <a :href="this.articleUrl">{{ this.title }}</a>
+            </h3>
+            <li>
+              <b>Total Number of Outlinks:</b> {{ this.results.outlink_count }}
+            </li>
+            <li>
+              <b>Total Number of Inlinks:</b> {{ this.results.inlink_count }}
+            </li>
           </ol>
 
           <template v-if="this.results.outlink_summary.regions">
-            <br><h2> Outlink Summary </h2>
-              <div class="link-legend"><div class="legend-title">Outlink Threshold Guide</div><div class="legend-scale"><ul class="legend-labels"><li><span style="background:#bae4bc;"></span>Above</li><li><span style="background:#fdae6b;"></span>Below</li></ul></div></div>
-              <table id="outlink-summary-table" class="display"><thead><tr><th>Region</th><th>Outlink Count</th><th>Percentage distribution of outlinks (%)</th></tr></thead></table>
+            <br />
+            <h2>Outlink Summary</h2>
+            <div class="link-legend">
+              <div class="legend-title">Outlink Threshold Guide</div>
+              <div class="legend-scale">
+                <ul class="legend-labels">
+                  <li><span style="background:#bae4bc;"></span>Above</li>
+                  <li><span style="background:#fdae6b;"></span>Below</li>
+                </ul>
+              </div>
+            </div>
+            <table id="outlink-summary-table" class="display">
+              <thead>
+                <tr>
+                  <th>Region</th>
+                  <th>Outlink Count</th>
+                  <th>Percentage distribution of outlinks (%)</th>
+                </tr>
+              </thead>
+            </table>
           </template>
           <template v-else>
             <li>No outlink summary generated.</li>
           </template>
 
           <template v-if="this.results.inlink_summary.regions">
-            <br><h2> Inlink Summary </h2>
-            <div class="link-legend"><div class="legend-title">Inlink Threshold Guide</div><div class="legend-scale"><ul class="legend-labels"><li><span style="background:#bae4bc;"></span>Above</li><li><span style="background:#fdae6b;"></span>Below</li></ul></div></div>
-            <table id="inlink-summary-table" class="display"><thead><tr><th>Region</th><th>Inlink Count</th><th>Percentage distribution of inlinks (%)</th></tr></thead></table>
+            <br />
+            <h2>Inlink Summary</h2>
+            <div class="link-legend">
+              <div class="legend-title">Inlink Threshold Guide</div>
+              <div class="legend-scale">
+                <ul class="legend-labels">
+                  <li><span style="background:#bae4bc;"></span>Above</li>
+                  <li><span style="background:#fdae6b;"></span>Below</li>
+                </ul>
+              </div>
+            </div>
+            <table id="inlink-summary-table" class="display">
+              <thead>
+                <tr>
+                  <th>Region</th>
+                  <th>Inlink Count</th>
+                  <th>Percentage distribution of inlinks (%)</th>
+                </tr>
+              </thead>
+            </table>
           </template>
           <template v-else>
             <li>No Inlink summary generated.</li>
           </template>
-      </section>
+        </section>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 </template>
 
 <style lang="scss">
@@ -74,36 +115,36 @@
 </style>
 
 <script>
-import $ from 'jquery';
+import $ from "jquery";
 // TODO: vue.dataTables library?
 import "datatables/media/css/jquery.dataTables.min.css";
 import "datatables/media/js/jquery.dataTables.min.js";
 
 export default {
-  name: 'ResultsTable',
+  name: "ResultsTable",
   props: {
     response: Object,
-    title: String,
+    title: String
   },
   computed: {
     articleUrl() {
-      return this.response.article
+      return this.response.article;
     },
     results() {
-      return this.response.results
+      return this.response.results;
     },
     outlink_data() {
-      return this.results.outlink_summary["link-percent-count-dist"]
+      return this.results.outlink_summary["link-percent-count-dist"];
     },
     outlink_above_thresh() {
-      return this.results.outlink_summary["above-threshold"]
+      return this.results.outlink_summary["above-threshold"];
     },
     inlink_data() {
-      return this.results.inlink_summary["link-percent-count-dist"]
+      return this.results.inlink_summary["link-percent-count-dist"];
     },
     inlink_above_thresh() {
-      return this.results.inlink_summary["above-threshold"]
-    },
+      return this.results.inlink_summary["above-threshold"];
+    }
   },
   // TODO: Should also handle update. Until then, we can destroy and recreate
   // the element. The problem is a mismatch between jQuery and Vue.
@@ -140,6 +181,6 @@ export default {
         { data: "percent-dist" }
       ]
     });
-  },
-}
+  }
+};
 </script>

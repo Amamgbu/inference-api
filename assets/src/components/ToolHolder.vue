@@ -30,10 +30,10 @@ export default {
     QueryForm,
     ResultsTable
   },
-  data: function () {
+  data: function() {
     return {
       results: null,
-      title: null,
+      title: null
     };
   },
   methods: {
