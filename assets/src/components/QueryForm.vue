@@ -33,6 +33,7 @@
 <script>
 // TODO: Stop using jQuery.
 import $ from "jquery";
+import "datatables/media/css/jquery.dataTables.min.css";
 import "datatables/media/js/jquery.dataTables.min.js";
 
 $(function() {
