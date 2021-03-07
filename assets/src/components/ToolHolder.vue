@@ -6,8 +6,13 @@
 
     <section id="topic-models" class="boxwidth--1-1 padded--left padded--right">
       <main id="tool_main">
-        <query-form />
-        <results-table />
+        <query-form @query-results="result" />
+        <results-table
+          v-if="this.results"
+          :response="this.results"
+          :key="this.title"
+          :title="this.title"
+        />
       </main>
     </section>
   </article>
@@ -24,6 +29,18 @@ export default {
     Introduction,
     QueryForm,
     ResultsTable
+  },
+  data: function () {
+    return {
+      results: null,
+      title: null,
+    };
+  },
+  methods: {
+    result(title, results) {
+      this.title = title;
+      this.results = results;
+    }
   }
 };
 </script>
