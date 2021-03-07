@@ -1,12 +1,13 @@
 <template>
   <label class="placeholder"
-    :class="{ off: !isFocused && !selected }"
+    :class="{ off: !isFocused && !modelValue }"
     @focusin="isFocused = true"
     @focusout="isFocused = false"
   ><span class="field_name">Language code -- e.g., en for English</span>
     <select
       id="lang"
-      v-model="selected"
+      @input="$emit('update:modelValue', $event.target.value)"
+      :selected="modelValue"
     >
       <option value=""></option>
       <option value="en">English</option>
@@ -18,10 +19,12 @@
 <script>
 export default {
   name: "LanguageSelector",
+  props: {
+    modelValue: String,
+  },
   data: function () {
     return {
       isFocused: false,
-      selected: "",
     };
   },
 }

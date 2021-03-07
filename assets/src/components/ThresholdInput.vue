@@ -1,20 +1,27 @@
 <template>
     <label class="placeholder"
-        :class="{ off: !isFocused && !value }"
+        :class="{ off: !isFocused && !modelValue }"
         @focusin="isFocused = true"
         @focusout="isFocused = false"
     ><span class="field_name">Threshold -- e.g., 0.5(percentage) or 12(no. of links)</span >
-        <input type="text" v-model="value" placeholder="Placeholder text" id="threshold" />
+        <input
+            id="threshold"
+            type="text"
+            :value="modelValue"
+            @input="$emit('update:modelValue', $event.target.value)"
+        />
     </label>
 </template>
 
 <script>
 export default {
   name: "ThresholdInput",
+  props: {
+    modelValue: String,
+  },
   data: function () {
     return {
       isFocused: false,
-      value: "0.5",
     };
   },
 }

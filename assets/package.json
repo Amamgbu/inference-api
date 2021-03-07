@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@types/jquery": "^3.5.5",
+    "axios": "^0.21.1",
     "core-js": "^3.6.5",
     "datatables": "^1.10.18",
     "jquery": "^3.6.0",

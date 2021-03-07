@@ -3,17 +3,22 @@
     <form action="#topic-models">
       <div class="cols cols3">
         <div class="col col1">
-          <language-selector />
+          <language-selector v-model="this.lang"/>
         </div>
         <div class="col col1">
-          <article-title-picker />
+          <article-title-picker v-model="this.title"/>
         </div>
         <div class="col col1">
-          <threshold-input />
+          <threshold-input v-model="this.threshold"/>
         </div>
         <div class="col col1">
           <span class="field_name"></span>
-          <input type="submit" value="Submit" id="btnSubmit" />
+          <input
+            type="submit"
+            value="Submit"
+            id="btnSubmit"
+            @click.stop="submit"
+          />
         </div>
       </div>
     </form>
@@ -28,13 +33,8 @@ import "datatables/media/js/jquery.dataTables.min.js";
 import ArticleTitlePicker from "./ArticleTitlePicker";
 import LanguageSelector from "./LanguageSelector";
 import ThresholdInput from "./ThresholdInput";
-
-$(function() {
-  $("#btnSubmit").click(function(e) {
-    e.preventDefault();
-    queryCountryAPI();
-  });
-});
+import {getRandomTitle} from "../QueryRandomArticle";
+import {queryCountryAPI} from "../QueryInferenceService";
 
 var render_categories = function(data) {
   $("#country-results").empty();
@@ -123,50 +123,30 @@ var render_categories = function(data) {
   }
 };
 
-var update_title = function(data) {
-  document.getElementById("title").value = data["query"]["random"][0]["title"];
-  document.getElementById("title").parentNode.className = "placeholder";
-};
-
-function queryCountryAPI() {
-  if (
-    document.getElementById("lang").value &&
-    !document.getElementById("title").value
-  ) {
-    var randomPageQueryURL =
-      "https://" + document.getElementById("lang").value +
-      ".wikipedia.org/w/api.php?action=query&format=json&list=random&rnlimit=1&rnnamespace=0&origin=*";
-    $.ajax(randomPageQueryURL, {
-      success: update_title.bind(this),
-      error: function(jqxmlhr, status, error) {
-        console.log(status + ": " + error);
-      },
-      async: false
-    });
-  }
-
-  // TODO: API URL from configuration.
-  var queryUrl =
-    "/api/v1/get-summary?lang=" +
-    document.getElementById("lang").value +
-    "&title=" +
-    document.getElementById("title").value +
-    "&threshold=" +
-    document.getElementById("threshold").value;
-  $.ajax(queryUrl, {
-    success: render_categories.bind(this),
-    error: function(jqxmlhr, status, error) {
-      console.log(status + ": " + error);
-    }
-  });
-}
-
 export default {
   name: "QueryForm",
+  data: function () {
+    return {
+      lang: "",
+      title: "",
+      threshold: "0.5",
+    };
+  },
   components: {
     ArticleTitlePicker,
     LanguageSelector,
     ThresholdInput,
-  }
+  },
+  methods: {
+    submit: async function () {
+      if (this.lang && !this.title) {
+        this.title = await getRandomTitle(this.lang);
+      }
+
+      render_categories(
+        await queryCountryAPI(this.lang, this.title, this.threshold)
+      );
+    },
+  },
 };
 </script>
