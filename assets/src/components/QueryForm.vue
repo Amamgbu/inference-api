@@ -6,14 +6,10 @@
           <language-selector />
         </div>
         <div class="col col1">
-          <label class="placeholder"><span class="field_name">Article title -- e.g., Toni Morrison</span>
-            <input type="text" value="" placeholder="Placeholder text" id="title" />
-          </label>
+          <article-title-picker />
         </div>
         <div class="col col1">
-          <label class="placeholder"><span class="field_name">Threshold -- e.g., 0.5(percentage) or 12(no. of links)</span >
-            <input type="text" value="0.5" placeholder="Placeholder text" id="threshold" />
-          </label>
+          <threshold-input />
         </div>
         <div class="col col1">
           <span class="field_name"></span>
@@ -29,7 +25,9 @@
 import $ from "jquery";
 import "datatables/media/css/jquery.dataTables.min.css";
 import "datatables/media/js/jquery.dataTables.min.js";
+import ArticleTitlePicker from "./ArticleTitlePicker";
 import LanguageSelector from "./LanguageSelector";
+import ThresholdInput from "./ThresholdInput";
 
 $(function() {
   $("form label.placeholder").each(function() {
@@ -181,7 +179,9 @@ function queryCountryAPI() {
 export default {
   name: "QueryForm",
   components: {
+    ArticleTitlePicker,
     LanguageSelector,
+    ThresholdInput,
   }
 };
 </script>
