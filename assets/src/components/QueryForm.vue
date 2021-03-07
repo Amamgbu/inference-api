@@ -3,13 +3,7 @@
     <form action="#topic-models">
       <div class="cols cols3">
         <div class="col col1">
-          <label class="placeholder"><span class="field_name">Language code -- e.g., en for English</span>
-            <select id="lang">
-              <option value=""></option>
-              <option value="en">English</option>
-              <option value="fr">French</option>
-            </select>
-          </label>
+          <language-selector />
         </div>
         <div class="col col1">
           <label class="placeholder"><span class="field_name">Article title -- e.g., Toni Morrison</span>
@@ -35,6 +29,7 @@
 import $ from "jquery";
 import "datatables/media/css/jquery.dataTables.min.css";
 import "datatables/media/js/jquery.dataTables.min.js";
+import LanguageSelector from "./LanguageSelector";
 
 $(function() {
   $("form label.placeholder").each(function() {
@@ -184,6 +179,9 @@ function queryCountryAPI() {
 }
 
 export default {
-  name: "QueryForm"
+  name: "QueryForm",
+  components: {
+    LanguageSelector,
+  }
 };
 </script>
