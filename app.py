@@ -48,12 +48,6 @@ raw_data = "data/region_groundtruth_2020_11_29_aggregated_enwiki.json.bz2"
 #Load bz2 file    
 load = load_data(raw_data)
 
-@app.route('/')
-def index():
-    lang,title,error,threshold = validate_api_args()
-    return render_template('index.html',title=title, lang=lang,threshold=threshold)
-
-
 @app.route('/api/v1/get-summary',methods=['GET'])
 def get_link_summary():
     '''
