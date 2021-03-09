@@ -4,7 +4,7 @@
     :class="{ off: !isFocused && !modelValue }"
     @focusin="isFocused = true"
     @focusout="isFocused = false"
-    ><span class="field_name">Article title -- e.g., Toni Morrison</span>
+    ><span class="field_name">{{ $t("articlePlaceholder") }}</span>
     <input
       id="title"
       type="text"

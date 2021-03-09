@@ -15,7 +15,7 @@
           <span class="field_name"></span>
           <input
             type="submit"
-            value="Submit"
+            :value="$t('submitButton')"
             id="btnSubmit"
             @click.stop="submit"
           />
