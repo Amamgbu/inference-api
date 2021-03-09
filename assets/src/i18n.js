@@ -3,10 +3,12 @@ import { createI18n } from "vue-i18n";
 const messages = {
   en: {
     articlePlaceholder: "Article title -- e.g., Toni Morrison",
+    countryByArticleTitle: "Country Inference by Article",
     submitButton: "Submit"
   },
   qqq: {
     articlePlaceholder: "Placeholder text for article title input",
+    countryByArticleTitle: "Page title for the country by article title view",
     submitButton: "Button label for submitting the query form"
   }
 };
