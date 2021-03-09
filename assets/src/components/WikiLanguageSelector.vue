@@ -4,15 +4,15 @@
     :class="{ off: !isFocused && !modelValue }"
     @focusin="isFocused = true"
     @focusout="isFocused = false"
-    ><span class="field_name">{{ $t('wikiLanguagePlaceholder') }}</span>
+    ><span class="field_name">{{ $t("wikiLanguagePlaceholder") }}</span>
     <select
       id="lang"
       @input="$emit('update:modelValue', $event.target.value)"
       :selected="modelValue"
     >
       <option value=""></option>
-      <option value="en">{{ $t('wikiLanguage.en') }}</option>
-      <option value="fr">{{ $t('wikiLanguage.fr') }}</option>
+      <option value="en">{{ $t("wikiLanguage.en") }}</option>
+      <option value="fr">{{ $t("wikiLanguage.fr") }}</option>
     </select>
   </label>
 </template>
