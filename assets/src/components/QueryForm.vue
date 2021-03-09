@@ -3,7 +3,7 @@
     <form action="#topic-models">
       <div class="cols cols3">
         <div class="col col1">
-          <language-selector v-model="this.lang" />
+          <wiki-language-selector v-model="this.lang" />
         </div>
         <div class="col col1">
           <article-title-picker v-model="this.title" />
@@ -27,7 +27,7 @@
 
 <script>
 import ArticleTitlePicker from "./ArticleTitlePicker";
-import LanguageSelector from "./LanguageSelector";
+import WikiLanguageSelector from "./WikiLanguageSelector";
 import ThresholdInput from "./ThresholdInput";
 import { getRandomTitle } from "../QueryRandomArticle";
 import { queryCountryAPI } from "../QueryInferenceService";
@@ -44,7 +44,7 @@ export default {
   emits: ["query-results"],
   components: {
     ArticleTitlePicker,
-    LanguageSelector,
+    WikiLanguageSelector,
     ThresholdInput
   },
   methods: {
