@@ -14,7 +14,8 @@
     "core-js": "^3.6.5",
     "datatables": "^1.10.18",
     "jquery": "^3.6.0",
-    "vue": "^3.0.0"
+    "vue": "^3.0.0",
+    "vue-i18n": "^9.0.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

@@ -7,20 +7,32 @@
           alt="Wikimedia Foundation logo"
         />Wikimedia Research</a
       >
+      <interface-locale-changer />
     </div>
   </div>
 </template>
 
+<script>
+import InterfaceLocaleChanger from "./InterfaceLocaleChanger.vue";
+
+export default {
+  name: "TopBar",
+  components: {
+    InterfaceLocaleChanger
+  }
+};
+</script>
+
 <style lang="scss">
 #origin_bar {
   position: fixed;
-  width: 100%;
+  width: 100vw;
   top: 0;
   left: 0;
   z-index: 1;
+  display: flex;
 
   .origin_title {
-    display: inline-block;
     height: calc(var(--gutter) * 2);
     line-height: calc(var(--gutter) * 2);
     text-transform: uppercase;
@@ -31,7 +43,6 @@
     color: inherit;
 
     img {
-      display: inline-block;
       vertical-align: middle;
       height: 24px;
       margin-right: 0.8rem;
