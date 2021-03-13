@@ -106,6 +106,11 @@ const messages = {
 };
 
 function getBrowserLocale(options = {}) {
+  if (localStorage.getItem("locale")) {
+    // FIXME: group with the logic across in InterfaceLocaleChanger.vue
+    return localStorage.getItem("locale");
+  }
+
   const defaultOptions = { trimCountryCode: true };
 
   const opt = { ...defaultOptions, ...options };
