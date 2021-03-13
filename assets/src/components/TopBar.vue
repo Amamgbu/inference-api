@@ -5,7 +5,7 @@
         ><img
           src="@/assets/Wikimedia-Foundation-logo.svg"
           alt="Wikimedia Foundation logo"
-        />Wikimedia Research</a
+        />{{ $t("wikimediaResearch") }}</a
       >
       <interface-locale-changer />
     </div>

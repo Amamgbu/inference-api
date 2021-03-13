@@ -5,10 +5,10 @@
   >
     <header id="tool_header">
       <!-- Tool name -->
-      <h1>Article Classification</h1>
+      <h1>{{ $t("countryByArticleTitle") }}</h1>
       <div class="meta">
         <div class="disclaimer note">
-          <p>No guarantees are made that this tool will be maintained.</p>
+          <p>{{ $t("disclaimerNote") }}</p>
           <p>
             This is an experimental tool hosted on
             <a href="https://wikitech.wikimedia.org/wiki/Portal:Toolforge"
@@ -24,15 +24,7 @@
           </p>
         </div>
         <div class="description padded--right">
-          <p>
-            This tool labels Wikipedia articles with countries that are
-            predicted to relate to the article. The countries are drawn from
-            <a
-              href="https://www.wikidata.org/wiki/Special:WhatLinksHere/Q3624078"
-              >places that are instance-of sovereign state on Wikidata (193 in
-              total).</a
-            >
-          </p>
+          <p v-html="$t('introductionText', ['https://www.wikidata.org/wiki/Special:WhatLinksHere/Q3624078'])"></p>
         </div>
       </div>
     </header>
