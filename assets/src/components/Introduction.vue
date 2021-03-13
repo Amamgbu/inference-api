@@ -8,20 +8,8 @@
       <h1>{{ $t("countryByArticleTitle") }}</h1>
       <div class="meta">
         <div class="disclaimer note">
-          <p>{{ $t("disclaimerNote") }}</p>
-          <p>
-            This is an experimental tool hosted on
-            <a href="https://wikitech.wikimedia.org/wiki/Portal:Toolforge"
-              >Toolforge</a
-            >. No additional personal data is collected by this tool per the
-            Cloud Services
-            <a
-              href="https://wikitech.wikimedia.org/wiki/Wikitech:Cloud_Services_Terms_of_use"
-              target="_blank"
-              rel="noopener"
-              >Terms of Use</a
-            >.
-          </p>
+          <p>{{ $t('disclaimerNote1') }}</p>
+          <p v-html="$t('disclaimerNote2', ['https://wikitech.wikimedia.org/wiki/Portal:Toolforge', 'https://wikitech.wikimedia.org/wiki/Wikitech:Cloud_Services_Terms_of_use'])"></p>
         </div>
         <div class="description padded--right">
           <p v-html="$t('introductionText', ['https://www.wikidata.org/wiki/Special:WhatLinksHere/Q3624078'])"></p>

@@ -8,7 +8,12 @@ const messages = {
     },
     articlePlaceholder: "Article title—e.g., Toni Morrison",
     countryByArticleTitle: "Country Inference by Article",
-    disclaimerNote: "No guarantees are made that this tool will be maintained.",
+    disclaimerNote1: "No guarantees are made that this tool will be maintained.",
+    disclaimerNote2: `
+      This is an experimental tool hosted on <a href="{0}">Toolforge</a>.
+      No additional personal data is collected by this tool per the
+      Cloud Services <a href="{1}" target="_blank" rel="noopener">Terms of Use</a>.
+    `,
     introductionText: `
       This tool labels Wikipedia articles with countries that are
       predicted to relate to the article. The countries are drawn from
@@ -26,7 +31,12 @@ const messages = {
     },
     articlePlaceholder: "Título del artículo: p. Ej. Toni Morrison",
     countryByArticleTitle: "Inferencia de país por artículo",
-    disclaimerNote: "No se ofrecen garantías de mantenimiento de esta herramienta.",
+    disclaimerNote1: "No se ofrecen garantías de mantenimiento de esta herramienta.",
+    disclaimerNote2: `
+      Esta es una herramienta experimental alojada en <a href="{0}">Toolforge</a>.
+      Esta herramienta no recopila datos personales adicionales según el
+      <a href="{1}" target="_blank" rel="noopener">Condiciones de uso</a> de los servicios en la nube.
+    `,
     introductionText: `
       Esta herramienta etiqueta los artículos de Wikipedia con países que son
       predice que se relacionará con el artículo. Los países se extraen de
@@ -40,7 +50,8 @@ const messages = {
   qqq: {
     articlePlaceholder: "Placeholder text for article title input",
     countryByArticleTitle: "Page title for the country by article title view",
-    disclaimerNote: "Disclaimer text explaining that this tool is not production-quality or -stability.",
+    disclaimerNote1: "Disclaimer text explaining that this tool is not production-quality or -stability",
+    disclaimerNote2: "Disclaimer text linking to context",
     introductionText: "Text introducing this tool",
     submitButton: "Button label for submitting the query form",
     thresholdPlaceholder: "Placeholder text for threshold field",
