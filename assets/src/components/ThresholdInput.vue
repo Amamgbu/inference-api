@@ -5,7 +5,7 @@
     @focusin="isFocused = true"
     @focusout="isFocused = false"
     ><span class="field_name"
-      >Threshold -- e.g., 0.5(percentage) or 12(no. of links)</span
+      >{{ $t("thresholdPlaceholder") }}</span
     >
     <input
       id="threshold"

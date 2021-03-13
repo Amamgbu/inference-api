@@ -9,6 +9,7 @@ const messages = {
     articlePlaceholder: "Article title—e.g., Toni Morrison",
     countryByArticleTitle: "Country Inference by Article",
     submitButton: "Submit",
+    thresholdPlaceholder: "Threshold—e.g., 0.5 (percentage) or 12 (no. of links)",
     wikiLanguagePlaceholder: 'Wikipedia language to query'
   },
   es: {
@@ -16,15 +17,17 @@ const messages = {
       en: "Inglés",
       fr: "Francés"
     },
-    articlePlaceholder: "Título del artículo, p. Ej. Toni Morrison",
+    articlePlaceholder: "Título del artículo: p. Ej. Toni Morrison",
     countryByArticleTitle: "Inferencia de país por artículo",
     submitButton: "Enviar",
+    thresholdPlaceholder: "Umbral: p. Ej., 0,5 (porcentaje) o 12 (número de enlaces)",
     wikiLanguagePlaceholder: 'Lenguaje de Wikipedia para consultar'
   },
   qqq: {
     articlePlaceholder: "Placeholder text for article title input",
     countryByArticleTitle: "Page title for the country by article title view",
     submitButton: "Button label for submitting the query form",
+    thresholdPlaceholder: "Placeholder text for threshold field",
     wikiLanguagePlaceholder: "Placeholder text for wiki language selector"
   }
 };
