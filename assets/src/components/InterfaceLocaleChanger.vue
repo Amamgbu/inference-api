@@ -2,7 +2,7 @@
   <div class="locale-changer">
     <select v-model="$i18n.locale">
       <option v-for="(lang, i) in langs" :key="`Lang${i}`" :value="lang">
-        {{ ownName[lang] }}
+        {{ ownNames[lang] }}
       </option>
     </select>
   </div>
@@ -12,11 +12,13 @@
 export default {
   name: "InterfaceLocaleChanger",
   data() {
+    const ownNames = {
+        en: "English",
+        es: "Español"
+    };
     return {
-      langs: ["en"],
-      ownName: {
-        en: "English"
-      }
+      langs: Object.keys(ownNames),
+      ownNames
     };
   }
 };

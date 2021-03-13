@@ -9,7 +9,17 @@ const messages = {
     articlePlaceholder: "Article title—e.g., Toni Morrison",
     countryByArticleTitle: "Country Inference by Article",
     submitButton: "Submit",
-    wikiLanguagePlaceholder: 'Language code—e.g., "en" for English'
+    wikiLanguagePlaceholder: 'Wikipedia language to query'
+  },
+  es: {
+    wikiLanguage: {
+      en: "Inglés",
+      fr: "Francés"
+    },
+    articlePlaceholder: "Título del artículo, p. Ej. Toni Morrison",
+    countryByArticleTitle: "Inferencia de país por artículo",
+    submitButton: "Enviar",
+    wikiLanguagePlaceholder: 'Lenguaje de Wikipedia para consultar'
   },
   qqq: {
     articlePlaceholder: "Placeholder text for article title input",
