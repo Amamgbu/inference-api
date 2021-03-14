@@ -14,63 +14,63 @@
               <a :href="this.articleUrl">{{ this.title }}</a>
             </h3>
             <li>
-              <b>Total Number of Outlinks:</b> {{ this.results.outlink_count }}
+              <b>{{ $t("outlinkTotal") }}</b> {{ this.results.outlink_count }}
             </li>
             <li>
-              <b>Total Number of Inlinks:</b> {{ this.results.inlink_count }}
+              <b>{{ $t("inlinkTotal") }}</b> {{ this.results.inlink_count }}
             </li>
           </ol>
 
           <template v-if="this.results.outlink_summary.regions">
             <br />
-            <h2>Outlink Summary</h2>
+            <h2>{{ $t("outlinkSummary") }}</h2>
             <div class="link-legend">
-              <div class="legend-title">Outlink Threshold Guide</div>
+              <div class="legend-title">{{ $t("outlinkThresholdLegend") }}</div>
               <div class="legend-scale">
                 <ul class="legend-labels">
-                  <li><span style="background:#bae4bc;"></span>Above</li>
-                  <li><span style="background:#fdae6b;"></span>Below</li>
+                  <li><span style="background:#bae4bc;"></span>{{ $t("legendAbove") }}</li>
+                  <li><span style="background:#fdae6b;"></span>{{ $t("legendBelow") }}</li>
                 </ul>
               </div>
             </div>
             <table id="outlink-summary-table" class="display">
               <thead>
                 <tr>
-                  <th>Region</th>
-                  <th>Outlink Count</th>
-                  <th>Percentage distribution of outlinks (%)</th>
+                  <th>{{ $t("countryColumn") }}</th>
+                  <th>{{ $t("outlinkCountColumn") }}</th>
+                  <th>{{ $t("outlinkPercentColumn") }}</th>
                 </tr>
               </thead>
             </table>
           </template>
           <template v-else>
-            <li>No outlink summary generated.</li>
+            <li>{{ $t("outlinkSummaryEmpty") }}</li>
           </template>
 
           <template v-if="this.results.inlink_summary.regions">
             <br />
-            <h2>Inlink Summary</h2>
+            <h2>{{ $t("inlinkSummary") }}</h2>
             <div class="link-legend">
-              <div class="legend-title">Inlink Threshold Guide</div>
+              <div class="legend-title">{{ $t("inlinkThresholdLegend") }}</div>
               <div class="legend-scale">
                 <ul class="legend-labels">
-                  <li><span style="background:#bae4bc;"></span>Above</li>
-                  <li><span style="background:#fdae6b;"></span>Below</li>
+                  <li><span style="background:#bae4bc;"></span>{{ $t("legendAbove") }}</li>
+                  <li><span style="background:#fdae6b;"></span>{{ $t("legendBelow") }}</li>
                 </ul>
               </div>
             </div>
             <table id="inlink-summary-table" class="display">
               <thead>
                 <tr>
-                  <th>Region</th>
-                  <th>Inlink Count</th>
-                  <th>Percentage distribution of inlinks (%)</th>
+                  <th>{{ $t("countryColumn") }}</th>
+                  <th>{{ $t("inlinkCountColumn") }}</th>
+                  <th>{{ $t("inlinkPercentColumn") }}</th>
                 </tr>
               </thead>
             </table>
           </template>
           <template v-else>
-            <li>No Inlink summary generated.</li>
+            <li>{{ $t("inlinkSummaryEmpty") }}</li>
           </template>
         </section>
       </div>
