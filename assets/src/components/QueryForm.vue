@@ -41,7 +41,7 @@ export default {
       threshold: "0.5"
     };
   },
-  emits: ["query-results"],
+  emits: ["query-begin", "query-results"],
   components: {
     ArticleTitlePicker,
     WikiLanguageSelector,
@@ -49,6 +49,8 @@ export default {
   },
   methods: {
     submit: async function() {
+      this.$emit("query-begin");
+
       if (this.lang && !this.title) {
         this.title = await getRandomTitle(this.lang);
       }

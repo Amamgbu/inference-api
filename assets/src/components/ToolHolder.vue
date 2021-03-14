@@ -6,7 +6,14 @@
 
     <section id="topic-models" class="boxwidth--1-1 padded--left padded--right">
       <main id="tool_main">
-        <query-form @query-results="result" />
+        <div v-if="this.error" class="error">
+          <span class="message">Your query failed:</span>
+          <span class="raw">{{ this.error.message }}</span>
+        </div>
+        <query-form
+          @query-begin="this.error = null"
+          @query-results="result"
+        />
         <results-table
           v-if="this.results"
           :response="this.results"
@@ -32,6 +39,7 @@ export default {
   },
   data: function() {
     return {
+      error: null,
       results: null,
       title: null
     };
@@ -41,6 +49,11 @@ export default {
       this.title = title;
       this.results = results;
     }
+  },
+  errorCaptured(err) {
+    this.error = err;
+    this.results = null;
+    return false;
   }
 };
 </script>
@@ -470,6 +483,23 @@ export default {
   .text > ul + *,
   .text > ol + * {
     margin-top: 4.2rem;
+  }
+
+  .error {
+    color: #d33;
+    border: 1px solid #d33;
+    background-color: #fee7e6;
+    padding: 5px 12px;
+    margin: 1em;
+
+    .message {
+      font-weight: bold;
+    }
+
+    .raw {
+      margin-left: 1em;
+      font-style: italic;
+    }
   }
 
   @media all and (max-width: 1000px) {
