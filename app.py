@@ -15,7 +15,6 @@ def load_data(raw_data_path):
     Description: On app start, process data and save as dict
     output: cleaned_dict,integer_country_dict
     '''
-    global CLEANED_DICT
     global INTEGER_COUNTRY_DICT
 
     with bz2.open(raw_data_path, "rt") as file:
@@ -229,9 +228,6 @@ def get_summary_stats(list_of_links,threshold=0.5):
     output: returns a dict containing summary stats
     
     '''
-    global INTEGER_COUNTRY_DICT
-    global CLEANED_DICT
-
     
     region_list = [] #List containing unique regions per outlink
     
